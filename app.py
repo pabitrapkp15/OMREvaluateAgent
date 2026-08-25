@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from batch import evaluate_batch
-from db import clear_all_data, get_all_results, get_answer_key, init_db, save_answer_key, save_student_result
+from db import delete_all_answer_keys, delete_all_student_results, delete_answer_key, get_all_results, get_answer_key, get_answer_key_info, init_db, save_answer_key, save_student_result
 from evaluator import evaluate
 from models import AnswerKey, StudentResult
 from pdf_parser import debug_extract, extract_answers
@@ -26,63 +26,102 @@ def _upload_generation(name: str) -> int:
     return st.session_state[name]
 
 
-def _reset_checkbox_key() -> str:
-    return f"reset_acknowledged_{_upload_generation('reset_acknowledged_generation')}"
-
-
 def _student_input_key(name: str) -> str:
     return f"{name}_{_upload_generation('student_input_generation')}"
+
+
+def _show_delete_set_dialog() -> None:
+    set_name = st.session_state.get("pending_delete_set")
+    if not set_name:
+        return
+    st.write(f"Delete the saved answer key for Set {set_name}? This cannot be undone.")
+    confirm, cancel = st.columns(2)
+    if confirm.button("Confirm", type="primary", key="confirm_delete_set"):
+        if delete_answer_key(set_name):
+            st.session_state["key_delete_success_message"] = f"Set {set_name} answer key deleted."
+        st.session_state.pop("pending_delete_set", None)
+        st.rerun()
+    if cancel.button("Cancel", key="cancel_delete_set"):
+        st.session_state.pop("pending_delete_set", None)
+        st.rerun()
+
+
+def _show_delete_all_dialog() -> None:
+    saved_sets = st.session_state.get("pending_delete_all_sets", [])
+    if not saved_sets:
+        return
+    set_list = ", ".join(saved_sets)
+    st.write(f"Delete ALL saved answer keys for Sets {set_list}? This cannot be undone.")
+    confirm, cancel = st.columns(2)
+    if confirm.button("Confirm", type="primary", key="confirm_delete_all"):
+        count = delete_all_answer_keys()
+        st.session_state["key_delete_success_message"] = f"All answer keys deleted ({count} removed). Student results were not changed."
+        st.session_state.pop("pending_delete_all_sets", None)
+        st.rerun()
+    if cancel.button("Cancel", key="cancel_delete_all"):
+        st.session_state.pop("pending_delete_all_sets", None)
+        st.rerun()
+
+
+def _show_clear_results_dialog() -> None:
+    if not st.session_state.get("pending_clear_results"):
+        return
+    st.write("Clear ALL saved student results? Answer keys will not be changed. This cannot be undone.")
+    confirm, cancel = st.columns(2)
+    if confirm.button("Confirm", type="primary", key="confirm_clear_results"):
+        count = delete_all_student_results()
+        st.session_state["results_clear_success_message"] = f"Cleared {count} student results. Answer keys were not changed."
+        st.session_state.pop("pending_clear_results", None)
+        st.rerun()
+    if cancel.button("Cancel", key="cancel_clear_results"):
+        st.session_state.pop("pending_clear_results", None)
+        st.rerun()
+
+
+if hasattr(st, "dialog"):
+    _show_delete_set_dialog = st.dialog("Confirm answer-key deletion")(_show_delete_set_dialog)
+    _show_delete_all_dialog = st.dialog("Confirm all answer-key deletion")(_show_delete_all_dialog)
+    _show_clear_results_dialog = st.dialog("Confirm student-results deletion")(_show_clear_results_dialog)
 
 
 def inject_styles() -> None:
     st.markdown("""
     <style>
-    /* OMR Evaluate visual system: ocean blue structure, teal action, clear result states. */
-    :root { --omr-ink: #16324F; --omr-blue: #0B3954; --omr-teal: #087E8B; --omr-line: #C9D8E0; }
-    .stApp { background: #F7FAFC; }
-    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0B3954 0%, #123F59 58%, #0E5360 100%); }
+    /* OMR Evaluate visual system: energetic ocean tones with readable status contrast. */
+    :root { --omr-ink: #16324F; --omr-blue: #0B3954; --omr-teal: #087E8B; --omr-coral: #EF476F; --omr-gold: #F4A261; --omr-line: #9BC5D1; }
+    .stApp { background: linear-gradient(135deg, #F7FAFC 0%, #EEF8F7 54%, #FFF7EF 100%); }
+    [data-testid="stSidebar"] { background: linear-gradient(180deg, #073B4C 0%, #0B3954 58%, #087E8B 100%); }
     [data-testid="stSidebar"] * { color: #F5FAFC; }
     [data-testid="stSidebar"] hr { border-color: rgba(255,255,255,.22); }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #DDECF0; }
-    .omr-hero { padding: 1.2rem 1.45rem; border: 1px solid var(--omr-line); border-radius: 14px; background: white; box-shadow: 0 8px 24px rgba(11,57,84,.08); margin-bottom: 1.2rem; }
-    .omr-hero h1 { color: var(--omr-blue); letter-spacing: 0; margin: 0; }
-    .omr-card { padding: 1rem 1.15rem; border: 1px solid var(--omr-line); border-radius: 10px; background: white; box-shadow: 0 4px 14px rgba(11,57,84,.06); margin: .6rem 0 1rem; }
+    .omr-hero { padding: 1.2rem 1.45rem; border: 2px solid var(--omr-teal); border-radius: 14px; background: linear-gradient(110deg, #FFFFFF 0%, #E8F7F4 100%); box-shadow: 0 10px 26px rgba(8,126,139,.15); margin-bottom: 1.2rem; }
+    .omr-hero h1 { color: var(--omr-blue); letter-spacing: 0; margin: 0; text-shadow: 1px 1px 0 #BEEBE4; }
+    .omr-card { padding: 1rem 1.15rem; border: 2px solid var(--omr-line); border-radius: 10px; background: rgba(255,255,255,.94); box-shadow: 0 6px 18px rgba(11,57,84,.1); margin: .6rem 0 1rem; }
+    .omr-table-header { padding: .7rem .85rem; border: 2px solid var(--omr-blue); border-radius: 9px 9px 0 0; color: white; background: var(--omr-blue); }
+    .omr-table-row { padding: .35rem .25rem; border: 1px solid var(--omr-line); border-top: 0; background: rgba(255,255,255,.92); }
+    .omr-table-row:last-of-type { border-radius: 0 0 9px 9px; }
     .omr-step { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.16); }
     .omr-step:last-child { border-bottom: 0; }
     .omr-status { display: flex; justify-content: space-between; padding: .35rem .55rem; margin: .2rem 0; border-radius: 6px; background: rgba(255,255,255,.09); }
     .omr-badge { display: inline-block; padding: .52rem 1rem; border-radius: 999px; font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; }
-    .omr-pass { color: #0B5D3B; background: #DDF7E9; border: 1px solid #9ADBB8; }
-    .omr-fail { color: #9F1C16; background: #FDE4E2; border: 1px solid #F1AAA5; }
+    .omr-pass { color: #064E3B; background: #B7F7D8; border: 2px solid #16A36A; box-shadow: 0 3px 10px rgba(22,163,106,.2); }
+    .omr-fail { color: #8F1025; background: #FFD0D9; border: 2px solid var(--omr-coral); box-shadow: 0 3px 10px rgba(239,71,111,.2); }
     .omr-score { font-size: 2.4rem; font-weight: 750; color: var(--omr-blue); line-height: 1.1; margin: .35rem 0 .7rem; }
-    div.stButton > button[kind="primary"] { background: var(--omr-teal); border-color: var(--omr-teal); color: white; box-shadow: 0 4px 10px rgba(8,126,139,.2); }
-    div.stButton > button[kind="primary"]:hover { background: var(--omr-blue); border-color: var(--omr-blue); }
+    div.stButton > button { border-radius: 8px; border-width: 2px; font-weight: 650; }
+    div.stButton > button[kind="primary"] { background: var(--omr-teal); border-color: var(--omr-teal); color: white; box-shadow: 0 5px 12px rgba(8,126,139,.25); }
+    div.stButton > button[kind="primary"]:hover { background: var(--omr-coral); border-color: var(--omr-coral); transform: translateY(-1px); }
+    div.stButton > button[kind="secondary"]:hover { color: var(--omr-blue); border-color: var(--omr-gold); background: #FFF4E7; }
+    [data-testid="stProgressBar"] > div > div { background: linear-gradient(90deg, var(--omr-teal), var(--omr-coral)); }
     </style>
     """, unsafe_allow_html=True)
 
 
-def render_sidebar(saved_sets: list[str]) -> None:
+def render_sidebar() -> None:
     with st.sidebar:
         st.markdown("## :material/assignment_turned_in: OMR Evaluate")
         st.caption("Digital answer-sheet control room")
         st.markdown("### How to use this app")
         st.markdown('<div class="omr-step"><strong>1</strong> &nbsp; Upload an answer key for each set</div><div class="omr-step"><strong>2</strong> &nbsp; Evaluate students one-by-one or in batch</div><div class="omr-step"><strong>3</strong> &nbsp; Download the results</div>', unsafe_allow_html=True)
-        st.markdown("### Key setup")
-        for set_name in SETS:
-            icon = ":material/check_circle:" if set_name in saved_sets else ":material/radio_button_unchecked:"
-            label = "Saved" if set_name in saved_sets else "Missing"
-            st.markdown(f'<div class="omr-status"><span>Set {set_name}</span><span>{icon} {label}</span></div>', unsafe_allow_html=True)
-        st.caption(f"{len(saved_sets)}/4 answer keys ready")
-        with st.expander("Danger zone", icon=":material/warning:"):
-            st.caption("Resetting permanently deletes every saved answer key and student result.")
-            reset_message = st.session_state.get("reset_success_message")
-            if reset_message:
-                st.success(reset_message, icon=":material/check_circle:")
-            acknowledged = st.checkbox("I understand this deletes all saved keys and results", key=_reset_checkbox_key())
-            if st.button("Reset everything", type="secondary", disabled=not acknowledged, key="reset_everything", icon=":material/delete_forever:"):
-                key_count, result_count = clear_all_data()
-                st.session_state["reset_success_message"] = f"Cleared {key_count} answer keys and {result_count} student results."
-                st.session_state["reset_acknowledged_generation"] += 1
-                st.rerun()
 
 
 def render_result_badge(passed: bool) -> None:
@@ -141,17 +180,40 @@ def debug_uploaded(uploaded_file):
 def main() -> None:
     init_db()
     st.set_page_config(page_title="OMR Evaluate", page_icon=":material/assignment_turned_in:", layout="wide")
-    saved_sets = [item for item in SETS if get_answer_key(item)]
     inject_styles()
-    render_sidebar(saved_sets)
+    render_sidebar()
     st.markdown('<div class="omr-hero"><h1>OMR Evaluate</h1><p>Digital answer-sheet evaluation for exam sets A-D</p></div>', unsafe_allow_html=True)
     setup_tab, evaluate_tab, batch_tab, results_tab, debug_tab = st.tabs(["🔑 Setup keys", "✓ Evaluate student", "⇢ Batch evaluate", "▦ All results", "⚙ Calibration / debug"])
 
     with setup_tab:
         st.subheader("🔑 Master answer keys")
         st.caption("Upload one complete 50-question master answer key for each exam set. Saved keys unlock evaluation.")
-        status = pd.DataFrame({"Set": SETS, "Status": ["Saved" if get_answer_key(item) else "Missing" for item in SETS]})
-        st.dataframe(status, hide_index=True, width="stretch")
+        st.caption("Manage saved keys below. Deleting a key never deletes student results.")
+        with st.container(border=True):
+            headers = st.columns([1, 2, 2, 1])
+            for header, label in zip(headers, ["Set", "Status", "Uploaded at", "Delete"]):
+                header.markdown(f"**{label}**")
+        saved_sets = []
+        for set_name in SETS:
+            key_info = get_answer_key_info(set_name)
+            if key_info:
+                saved_sets.append(set_name)
+            with st.container(border=True):
+                row = st.columns([1, 2, 2, 1])
+                row[0].write(set_name)
+                row[1].write("Saved" if key_info else "Not Saved")
+                row[2].write(key_info["uploaded_at"] if key_info else "")
+                if key_info:
+                    if row[3].button("", key=f"delete_key_{set_name}", icon=":material/delete:", help=f"Delete Set {set_name} answer key"):
+                        st.session_state["pending_delete_set"] = set_name
+                        _show_delete_set_dialog()
+        if saved_sets:
+            if st.button("Delete All Answer Keys", key="delete_all_keys", icon=":material/delete_sweep:"):
+                st.session_state["pending_delete_all_sets"] = saved_sets
+                _show_delete_all_dialog()
+            st.caption("This deletes answer keys only. Student results are preserved.")
+        if st.session_state.get("key_delete_success_message"):
+            st.success(st.session_state["key_delete_success_message"], icon=":material/check_circle:")
         selected_set = st.selectbox("Answer-key set", SETS, key="key_set")
         previous_set = st.session_state.get("key_upload_selected_set")
         if previous_set is not None and previous_set != selected_set:
@@ -226,7 +288,7 @@ def main() -> None:
 
     with batch_tab:
         st.subheader("⇢ Evaluate multiple students")
-        st.info("Name files like `Student_Name_SetA.pdf` to detect the set automatically. Files without `_SetX` use the fallback dropdown.", icon=":material/info:")
+        st.info("Preferred: `Student_Name_RollNo_SetX.pdf` such as `Ananya_Sharma_007_SetA.pdf` extracts name, roll number, and set. Older: `Student_Name_SetX.pdf` such as `Ananya_Sharma_SetA.pdf` extracts name and set, leaving roll number blank. Files without a recognizable `_SetX` marker use the fallback dropdown.", icon=":material/info:")
         batch_set = st.selectbox("Fallback exam set", SETS, key="batch_set")
         batch_files = st.file_uploader("Upload student answer PDFs", type="pdf", accept_multiple_files=True, key=f"batch_upload_{batch_set}_{_upload_generation('batch_upload_generation')}")
         if st.button("Evaluate batch", type="primary"):
@@ -261,6 +323,11 @@ def main() -> None:
             excel_buffer = BytesIO()
             results.to_excel(excel_buffer, index=False, engine="openpyxl")
             st.download_button("Download as Excel", excel_buffer.getvalue(), "omr-results.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon=":material/download:")
+            if st.button("Clear All Student Results", key="clear_all_student_results", icon=":material/delete_forever:"):
+                st.session_state["pending_clear_results"] = True
+                _show_clear_results_dialog()
+        if st.session_state.get("results_clear_success_message"):
+            st.success(st.session_state["results_clear_success_message"], icon=":material/check_circle:")
 
     with debug_tab:
         st.subheader("⚙ Verify a real PDF before evaluation")

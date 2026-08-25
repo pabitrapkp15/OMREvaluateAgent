@@ -1,5 +1,5 @@
 from batch import evaluate_batch, parse_batch_filename
-from db import clear_all_data, get_all_results, save_student_result
+from db import delete_all_answer_keys, delete_all_student_results, get_all_results, save_student_result
 
 
 def key():
@@ -27,7 +27,8 @@ def test_batch_all_files_succeed():
 
 
 def test_batch_duplicate_roll_numbers_last_file_updates_existing_result():
-    clear_all_data()
+    delete_all_answer_keys()
+    delete_all_student_results()
     files = [("Asha_007_SetA.pdf", "first.pdf"), ("Asha_007_SetA.pdf", "second.pdf")]
     answers = key()
 

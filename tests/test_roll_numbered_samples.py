@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from batch import evaluate_batch, parse_batch_filename
-from db import clear_all_data, get_all_results, save_answer_key, save_student_result
+from db import delete_all_answer_keys, delete_all_student_results, get_all_results, save_answer_key, save_student_result
 from pdf_parser import extract_answers
 
 
@@ -10,7 +10,8 @@ SAMPLES = Path(__file__).parent / "samples"
 
 
 def test_roll_numbered_samples_parse_and_save_as_distinct_batch_rows():
-    clear_all_data()
+    delete_all_answer_keys()
+    delete_all_student_results()
     expected = json.loads((SAMPLES / "expected_results.json").read_text(encoding="utf-8"))
     new_files = [name for name, details in expected.items() if "roll_no" in details]
     for set_name in "ABCD":

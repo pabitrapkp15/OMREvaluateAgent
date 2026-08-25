@@ -35,11 +35,47 @@ def save_answer_key(set_name: str, answers: dict[int, str], uploaded_at: str) ->
         connection.execute("INSERT OR REPLACE INTO answer_keys VALUES (?, ?, ?)", (set_name, json.dumps(answers), uploaded_at))
 
 
+def delete_answer_key(set_name: str) -> bool:
+    """Delete one answer key only; student results are never modified."""
+    init_db()
+    with _connection() as connection:
+        cursor = connection.execute("DELETE FROM answer_keys WHERE set_name = ?", (set_name,))
+    return cursor.rowcount > 0
+
+
+def delete_all_answer_keys() -> int:
+    """Delete all answer keys only; student results are never modified."""
+    init_db()
+    with _connection() as connection:
+        key_count = connection.execute("SELECT COUNT(*) FROM answer_keys").fetchone()[0]
+        connection.execute("DELETE FROM answer_keys")
+    return key_count
+
+
+def delete_all_student_results() -> int:
+    """Delete all student results only; answer keys are never modified."""
+    init_db()
+    with _connection() as connection:
+        result_count = connection.execute("SELECT COUNT(*) FROM student_results").fetchone()[0]
+        connection.execute("DELETE FROM student_results")
+    return result_count
+
+
 def get_answer_key(set_name: str) -> dict[int, str] | None:
     init_db()
     with _connection() as connection:
         row = connection.execute("SELECT answers FROM answer_keys WHERE set_name = ?", (set_name,)).fetchone()
     return {int(key): value for key, value in json.loads(row[0]).items()} if row else None
+
+
+def get_answer_key_info(set_name: str) -> dict[str, object] | None:
+    """Return a key and its upload timestamp for management displays."""
+    init_db()
+    with _connection() as connection:
+        row = connection.execute("SELECT answers, uploaded_at FROM answer_keys WHERE set_name = ?", (set_name,)).fetchone()
+    if not row:
+        return None
+    return {"answers": {int(key): value for key, value in json.loads(row[0]).items()}, "uploaded_at": row[1]}
 
 
 def save_student_result(result) -> None:
@@ -60,12 +96,3 @@ def get_all_results() -> pd.DataFrame:
         return pd.read_sql_query("SELECT id, student_name, roll_no, set_name, score, passed, evaluated_at, comment FROM student_results ORDER BY id DESC", connection)
 
 
-def clear_all_data() -> tuple[int, int]:
-    """Delete every saved key and result, returning counts removed."""
-    init_db()
-    with _connection() as connection:
-        key_count = connection.execute("SELECT COUNT(*) FROM answer_keys").fetchone()[0]
-        result_count = connection.execute("SELECT COUNT(*) FROM student_results").fetchone()[0]
-        connection.execute("DELETE FROM answer_keys")
-        connection.execute("DELETE FROM student_results")
-    return key_count, result_count
