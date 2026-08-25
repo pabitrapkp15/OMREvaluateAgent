@@ -1,0 +1,269 @@
+{
+  "student_topper_set_A.pdf": {
+    "student": "Ananya Sharma",
+    "set": "A",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "student_boundary_pass_set_A.pdf": {
+    "student": "Rohan Mehta",
+    "set": "A",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "student_boundary_fail_set_A.pdf": {
+    "student": "Ishita Nair",
+    "set": "A",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "student_low_scorer_set_A.pdf": {
+    "student": "Vikram Singh",
+    "set": "A",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "student_partial_attempt_set_A.pdf": {
+    "student": "Meera Iyer",
+    "set": "A",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "student_topper_set_B.pdf": {
+    "student": "Ananya Sharma",
+    "set": "B",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "student_boundary_pass_set_B.pdf": {
+    "student": "Rohan Mehta",
+    "set": "B",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "student_boundary_fail_set_B.pdf": {
+    "student": "Ishita Nair",
+    "set": "B",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "student_low_scorer_set_B.pdf": {
+    "student": "Vikram Singh",
+    "set": "B",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "student_partial_attempt_set_B.pdf": {
+    "student": "Meera Iyer",
+    "set": "B",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "student_topper_set_C.pdf": {
+    "student": "Ananya Sharma",
+    "set": "C",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "student_boundary_pass_set_C.pdf": {
+    "student": "Rohan Mehta",
+    "set": "C",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "student_boundary_fail_set_C.pdf": {
+    "student": "Ishita Nair",
+    "set": "C",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "student_low_scorer_set_C.pdf": {
+    "student": "Vikram Singh",
+    "set": "C",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "student_partial_attempt_set_C.pdf": {
+    "student": "Meera Iyer",
+    "set": "C",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "student_topper_set_D.pdf": {
+    "student": "Ananya Sharma",
+    "set": "D",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "student_boundary_pass_set_D.pdf": {
+    "student": "Rohan Mehta",
+    "set": "D",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "student_boundary_fail_set_D.pdf": {
+    "student": "Ishita Nair",
+    "set": "D",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "student_low_scorer_set_D.pdf": {
+    "student": "Vikram Singh",
+    "set": "D",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "student_partial_attempt_set_D.pdf": {
+    "student": "Meera Iyer",
+    "set": "D",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "Priya_Desai_SetA_partial_highscore.pdf": {
+    "student": "Priya Desai",
+    "set": "A",
+    "intended_score": 42,
+    "intended_passed": false,
+    "comment": "Answer not submitted - auto-fail regardless of score"
+  },
+  "Ananya_Sharma_007_SetA.pdf": {
+    "student": "Ananya Sharma",
+    "roll_no": "007",
+    "set": "A",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "Rohan_Mehta_008_SetA.pdf": {
+    "student": "Rohan Mehta",
+    "roll_no": "008",
+    "set": "A",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "Ishita_Nair_009_SetA.pdf": {
+    "student": "Ishita Nair",
+    "roll_no": "009",
+    "set": "A",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "Vikram_Singh_010_SetA.pdf": {
+    "student": "Vikram Singh",
+    "roll_no": "010",
+    "set": "A",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "Meera_Iyer_011_SetA.pdf": {
+    "student": "Meera Iyer",
+    "roll_no": "011",
+    "set": "A",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "Ananya_Sharma_012_SetB.pdf": {
+    "student": "Ananya Sharma",
+    "roll_no": "012",
+    "set": "B",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "Rohan_Mehta_013_SetB.pdf": {
+    "student": "Rohan Mehta",
+    "roll_no": "013",
+    "set": "B",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "Ishita_Nair_014_SetB.pdf": {
+    "student": "Ishita Nair",
+    "roll_no": "014",
+    "set": "B",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "Vikram_Singh_015_SetB.pdf": {
+    "student": "Vikram Singh",
+    "roll_no": "015",
+    "set": "B",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "Meera_Iyer_016_SetB.pdf": {
+    "student": "Meera Iyer",
+    "roll_no": "016",
+    "set": "B",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "Ananya_Sharma_017_SetC.pdf": {
+    "student": "Ananya Sharma",
+    "roll_no": "017",
+    "set": "C",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "Rohan_Mehta_018_SetC.pdf": {
+    "student": "Rohan Mehta",
+    "roll_no": "018",
+    "set": "C",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "Ishita_Nair_019_SetC.pdf": {
+    "student": "Ishita Nair",
+    "roll_no": "019",
+    "set": "C",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "Vikram_Singh_020_SetC.pdf": {
+    "student": "Vikram Singh",
+    "roll_no": "020",
+    "set": "C",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "Meera_Iyer_021_SetC.pdf": {
+    "student": "Meera Iyer",
+    "roll_no": "021",
+    "set": "C",
+    "intended_score": 35,
+    "intended_passed": false
+  },
+  "Ananya_Sharma_022_SetD.pdf": {
+    "student": "Ananya Sharma",
+    "roll_no": "022",
+    "set": "D",
+    "intended_score": 48,
+    "intended_passed": true
+  },
+  "Rohan_Mehta_023_SetD.pdf": {
+    "student": "Rohan Mehta",
+    "roll_no": "023",
+    "set": "D",
+    "intended_score": 40,
+    "intended_passed": true
+  },
+  "Ishita_Nair_024_SetD.pdf": {
+    "student": "Ishita Nair",
+    "roll_no": "024",
+    "set": "D",
+    "intended_score": 39,
+    "intended_passed": false
+  },
+  "Vikram_Singh_025_SetD.pdf": {
+    "student": "Vikram Singh",
+    "roll_no": "025",
+    "set": "D",
+    "intended_score": 20,
+    "intended_passed": false
+  },
+  "Meera_Iyer_026_SetD.pdf": {
+    "student": "Meera Iyer",
+    "roll_no": "026",
+    "set": "D",
+    "intended_score": 35,
+    "intended_passed": false
+  }
+}
